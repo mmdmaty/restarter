@@ -21,7 +21,7 @@ def get_data(inbount_id: tuple=(6,8), path: str = DB_path) -> int:
     return needed_users_count
 
 
-def create_json(J_path=JSON_PATH,data:dict=get_data()):
+def create_update_json(J_path=JSON_PATH,data:dict=get_data()):
     data = get_data() 
     with open(file=J_path,mode="w",encoding="utf-8") as test:
         json.dump(obj=data,fp=test)
@@ -32,20 +32,9 @@ def json_reader(J_path = JSON_PATH):
         with open(file=J_path,mode='r') as file:
             return json.load(fp=file)
     else:
-        create_json()
+        create_update_json()
         return json_reader()
     
 
-
-def restarter():
-    old_data = json_reader().get('user_count')
-    new_data = get_data().get('user_count')
-
-    print(old_data,new_data)
-
-    if old_data != new_data:
-        create_json()
-        return os.system("x-ui restart")
-
-
-restarter()
+def command_runner(command:str):
+    return os.system(command)
