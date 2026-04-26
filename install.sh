@@ -21,7 +21,7 @@ echo "Creating directory..."
 mkdir -p $INSTALL_DIR
 
 echo "Downloading project..."
-git clone https://github.com/USERNAME/REPO.git $INSTALL_DIR
+git clone https://github.com/mmdmaty/restarter.git $INSTALL_DIR
 
 SCRIPT_PATH="$INSTALL_DIR/main.py"
 
