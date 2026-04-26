@@ -3,8 +3,8 @@ import json
 import os
 
 
-DB_path = "./x-ui.db"
-JSON_PATH = "D:\\My Projects\\restrarter\\users.json"
+DB_path = "//etc//x-ui//x-ui.db"
+JSON_PATH = ".//users.json"
 
 def check_json_exists(J_path = JSON_PATH):
     return os.path.exists(path=J_path)
