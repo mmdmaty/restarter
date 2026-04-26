@@ -1,33 +1,65 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-echo "=== Installer ==="
+set -e
 
-read -p "Run cron job by minutes or hours? (m/h): " mode
+echo "=== Restarter Installer ==="
 
-if [ "$mode" = "m" ]; then
-    read -p "Enter interval in minutes: " interval
-    cron_time="*/$interval * * * *"
-elif [ "$mode" = "h" ]; then
-    read -p "Enter interval in hours: " interval
-    cron_time="0 */$interval * * *"
-else
-    echo "Invalid option"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_PATH="$SCRIPT_DIR/main.py"
+
+echo "Script directory: $SCRIPT_DIR"
+
+
+if [[ ! -f "$SCRIPT_PATH" ]]; then
+    echo "❌ Error: main.py not found in $SCRIPT_DIR"
     exit 1
 fi
 
-INSTALL_DIR="$HOME/my_script"
 
-echo "Creating directory..."
-mkdir -p $INSTALL_DIR
+echo "Choose interval mode:"
+echo "  m = minutes"
+echo "  h = hours"
+read -p "Mode (m/h): " mode
 
-echo "Downloading project..."
-git clone https://github.com/mmdmaty/restarter.git $INSTALL_DIR
+if [[ "$mode" == "m" ]]; then
+    read -p "Enter interval in minutes: " interval
+    if ! [[ "$interval" =~ ^[0-9]+$ ]]; then
+        echo "❌ Interval must be a number"
+        exit 1
+    fi
+    CRON_TIME="*/$interval * * * *"
 
-SCRIPT_PATH="$INSTALL_DIR/main.py"
+elif [[ "$mode" == "h" ]]; then
+    read -p "Enter interval in hours: " interval
+    if ! [[ "$interval" =~ ^[0-9]+$ ]]; then
+        echo "❌ Interval must be a number"
+        exit 1
+    fi
+    CRON_TIME="0 */$interval * * *"
 
-echo "Setting cron job..."
+else
+    echo "❌ Invalid option. Choose 'm' or 'h'."
+    exit 1
+fi
 
-(crontab -l 2>/dev/null; echo "$cron_time python3 $SCRIPT_PATH") | crontab -
 
-echo "✅ Installed successfully!"
-echo "Cron schedule: $cron_time"
+CRON_TAG="# restarter-cron-job"
+
+
+NEW_JOB="$CRON_TIME python3 $SCRIPT_PATH $CRON_TAG"
+
+
+echo "Configuring cron job..."
+
+(
+    crontab -l 2>/dev/null | grep -v "$CRON_TAG"
+    echo "$NEW_JOB"
+) | crontab -
+
+
+echo "--------------------------------------"
+echo "✅ Installation complete!"
+echo "📌 Cron job installed as:"
+echo "$NEW_JOB"
+echo "--------------------------------------"
